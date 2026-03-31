@@ -1,0 +1,279 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: "Poppins", sans-serif;
+}
+
+/* NAVBAR */
+nav {
+    padding: 20px 100px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+nav h2 {
+    font-size: 50px;
+    font-family: "Audiowide", sans-serif;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+nav .part2 {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+nav a {
+    font-size: 20px;
+    text-decoration: none;
+    color: black;
+    position: relative;
+}
+
+/* NAV HOVER EFFECT */
+nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0%;
+    height: 2px;
+    background: black;
+    transition: 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* USER NAME */
+#user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* MAIN */
+main {
+    width: 100%;
+    background-color: #D5FF41;
+    min-height: 100vh;
+}
+
+/* HERO SECTION */
+section {
+    padding: 20px 100px;
+}
+
+.hero-text1 h1,
+.hero-text2 h1 {
+    font-size: 120px;
+    text-transform: uppercase;
+    font-family: "Bruno Ace", sans-serif;
+    line-height: 1.1;
+}
+
+.hero-text2 p {
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+/* PRODUCTS GRID */
+.products {
+    width: 90%;
+    margin: 50px auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+/* PRODUCT BOX */
+.product-box {
+    height: 400px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    transition: 0.4s;
+}
+
+.product-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+}
+
+.product-info h2 {
+    font-size: 25px;
+}
+
+.product-info p {
+    font-size: 18px;
+}
+
+.product-info button {
+    margin-top: 10px;
+    padding: 8px 15px;
+    border: none;
+    background: black;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+/* HOVER EFFECT */
+.product-box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0px 20px 40px rgba(0,0,0,0.3);
+}
+
+.product-box:hover img {
+    transform: scale(1.1);
+}
+
+/* CART PAGE */
+#cart-items {
+    width: 60%;
+    margin: 50px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cart-item {
+    background: #7fbf2e;
+    padding: 20px 25px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.cart-right button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 20px;
+    background: black;
+    color: white;
+    cursor: pointer;
+}
+
+.cart-right button:hover {
+    background: red;
+}
+
+.total-box {
+    background: black;
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 22px;
+}
+
+.empty-cart {
+    text-align: center;
+    font-size: 20px;
+    color: gray;
+}
+
+/* LOGIN PAGE */
+.login {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.login-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 300px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 10px;
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+/* LOGOUT LINK SAME STYLE AS NAV LINKS */
+.logout-link {
+    font-size: 25px;
+    text-decoration: none;
+    color: black;
+    position: relative;
+    font-family: "Poppins", sans-serif;
+}
+
+/* ORDER BUTTON */
+.order-btn {
+    margin-top: 15px;
+    padding: 12px 25px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.order-btn:hover {
+    background: green;
+    transform: scale(1.05);
+}
+
+/* ORDER SUCCESS MESSAGE */
+.order-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    background: #28a745;
+    color: white;
+    padding: 30px 50px;
+    font-size: 22px;
+    border-radius: 10px;
+    opacity: 0;
+    animation: popup 0.5s forwards;
+}
+
+/* ANIMATION */
+@keyframes popup {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}

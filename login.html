@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>STYLE-MART Login</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Audiowide&family=Bruno+Ace&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="design.css">
+</head>
+
+<body onload="showUserName();">
+
+<main>
+
+    <!-- NAVBAR -->
+<nav>
+    <h2>STYLE-MART</h2>
+    <div class="part2">
+        <a href="products.html">Products</a>
+        <a href="cart.html">Cart</a>
+        <a href="login.html">Login</a>
+        <div id="user-name"></div>
+    </div>
+</nav>
+
+    <!-- LOGIN FORM -->
+    <section>
+        <div class="login">
+            <div class="login-box">
+
+                <h2 style="text-align:center; margin-bottom:20px;">Login</h2>
+
+                <label>Your Name:</label>
+                <input type="text" id="name" placeholder="Enter your name" required>
+
+                <label>Mobile No:</label>
+                <input type="text" id="mobile" placeholder="Enter 10 digit mobile number" maxlength="10">
+
+                <label>Email:</label>
+                <input type="email" id="email" placeholder="Enter email (must contain @)">
+
+                <label>Address:</label>
+                <input type="text" id="address" placeholder="Enter address">
+
+                <button onclick="loginUser()">Login</button>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>
