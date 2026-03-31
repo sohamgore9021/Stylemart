@@ -1,15 +1,20 @@
-// ADD TO CART
+// ADD TO CART WITH QUANTITY
 function addToCart(name, price) {
-
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    cart.push({
-        name: name,
-        price: price
-    });
+    let existingItem = cart.find(item => item.name === name);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            name: name,
+            price: Number(price),
+            quantity: 1
+        });
+    }
 
     localStorage.setItem("cart", JSON.stringify(cart));
-
     alert(name + " added to cart!");
 }
 
@@ -31,7 +36,16 @@ function loadCart() {
     let total = 0;
 
     cart.forEach((item, index) => {
-        total += item.price * item.quantity;
+
+        // Fix old cart items without quantity
+        if (!item.quantity) {
+            item.quantity = 1;
+        }
+
+        let price = Number(item.price);
+        let quantity = Number(item.quantity);
+
+        total += price * quantity;
 
         let div = document.createElement("div");
         div.classList.add("cart-item");
@@ -39,7 +53,7 @@ function loadCart() {
         div.innerHTML = `
             <div class="cart-left">
                 <h3>${item.name}</h3>
-                <p>₹${item.price} × ${item.quantity}</p>
+                <p>₹${price} × ${quantity}</p>
             </div>
 
             <div class="cart-right">
@@ -71,37 +85,32 @@ function loadCart() {
 
 // REMOVE ITEM
 function removeItem(index) {
-
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
     cart.splice(index, 1);
-
     localStorage.setItem("cart", JSON.stringify(cart));
-
     loadCart();
 }
 
 
-// LOGIN USER
+// LOGIN USER WITH VALIDATION
 function loginUser() {
     let name = document.getElementById("name").value;
     let mobile = document.getElementById("mobile").value;
     let email = document.getElementById("email").value;
     let address = document.getElementById("address").value;
 
-    // CHECK EMPTY
     if (!name || !mobile || !email || !address) {
         alert("Please fill all fields");
         return;
     }
 
-    // MOBILE VALIDATION (10 digits only)
+    // Mobile validation
     if (mobile.length !== 10 || isNaN(mobile)) {
         alert("Mobile number must be exactly 10 digits");
         return;
     }
 
-    // EMAIL VALIDATION (@ symbol)
+    // Email validation
     if (!email.includes("@")) {
         alert("Email must contain @ symbol");
         return;
@@ -123,11 +132,9 @@ function loginUser() {
 
 // CHECK LOGIN
 function checkLogin() {
-
     let user = JSON.parse(localStorage.getItem("user"));
 
     if (!user) {
-
         let container = document.getElementById("cart-items");
 
         if (container) {
@@ -156,9 +163,7 @@ function goToLogin() {
 
 // SHOW USER NAME
 function showUserName() {
-
     let user = JSON.parse(localStorage.getItem("user"));
-
     let nameBox = document.getElementById("user-name");
 
     if (user && nameBox) {
@@ -166,6 +171,8 @@ function showUserName() {
     }
 }
 
+
+// ORDER SUCCESS MESSAGE
 function showOrderSuccess() {
     let msg = document.createElement("div");
     msg.classList.add("order-message");
