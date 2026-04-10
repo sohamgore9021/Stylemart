@@ -1,4 +1,4 @@
-// ADD TO CART WITH QUANTITY
+// ================= ADD TO CART =================
 function addToCart(name, price) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
@@ -19,7 +19,7 @@ function addToCart(name, price) {
 }
 
 
-// LOAD CART
+// ================= LOAD CART =================
 function loadCart() {
     if (!checkLogin()) return;
 
@@ -37,10 +37,7 @@ function loadCart() {
 
     cart.forEach((item, index) => {
 
-        // Fix old cart items without quantity
-        if (!item.quantity) {
-            item.quantity = 1;
-        }
+        if (!item.quantity) item.quantity = 1;
 
         let price = Number(item.price);
         let quantity = Number(item.quantity);
@@ -75,15 +72,14 @@ function loadCart() {
     orderBtn.classList.add("order-btn");
 
     orderBtn.onclick = function() {
-        showOrderSuccess();
-        localStorage.removeItem("cart");
+        placeOrder();
     };
 
     container.appendChild(orderBtn);
 }
 
 
-// REMOVE ITEM
+// ================= REMOVE ITEM =================
 function removeItem(index) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     cart.splice(index, 1);
@@ -92,7 +88,7 @@ function removeItem(index) {
 }
 
 
-// LOGIN USER WITH VALIDATION
+// ================= LOGIN =================
 function loginUser() {
     let name = document.getElementById("name").value;
     let mobile = document.getElementById("mobile").value;
@@ -104,25 +100,17 @@ function loginUser() {
         return;
     }
 
-    // Mobile validation
     if (mobile.length !== 10 || isNaN(mobile)) {
-        alert("Mobile number must be exactly 10 digits");
+        alert("Mobile number must be 10 digits");
         return;
     }
 
-    // Email validation
     if (!email.includes("@")) {
-        alert("Email must contain @ symbol");
+        alert("Email must contain @");
         return;
     }
 
-    let user = {
-        name: name,
-        mobile: mobile,
-        email: email,
-        address: address
-    };
-
+    let user = { name, mobile, email, address };
     localStorage.setItem("user", JSON.stringify(user));
 
     alert("Login Successful!");
@@ -130,7 +118,7 @@ function loginUser() {
 }
 
 
-// CHECK LOGIN
+// ================= CHECK LOGIN =================
 function checkLogin() {
     let user = JSON.parse(localStorage.getItem("user"));
 
@@ -141,27 +129,21 @@ function checkLogin() {
             container.innerHTML = `
                 <div style="text-align:center; margin-top:50px;">
                     <h2>Please login first</h2>
-                    <button onclick="goToLogin()" style="padding:10px 20px; margin-top:20px;">
-                        Go to Login
-                    </button>
+                    <button onclick="goToLogin()">Go to Login</button>
                 </div>
             `;
         }
-
         return false;
     }
-
     return true;
 }
 
 
-// GO TO LOGIN
+// ================= NAVIGATION =================
 function goToLogin() {
     window.location.href = "login.html";
 }
 
-
-// SHOW USER NAME
 function showUserName() {
     let user = JSON.parse(localStorage.getItem("user"));
     let nameBox = document.getElementById("user-name");
@@ -172,7 +154,36 @@ function showUserName() {
 }
 
 
-// ORDER SUCCESS MESSAGE
+// ================= PLACE ORDER =================
+function placeOrder() {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let user = JSON.parse(localStorage.getItem("user"));
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    let total = 0;
+
+    cart.forEach(item => {
+        if (!item.quantity) item.quantity = 1;
+        total += item.price * item.quantity;
+    });
+
+    let orderData = {
+        userName: user.name,
+        items: cart,
+        total: total,
+        time: new Date().toLocaleString()
+    };
+
+    orders.push(orderData);
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    showOrderSuccess();
+
+    localStorage.removeItem("cart");
+}
+
+
+// ================= SUCCESS MESSAGE =================
 function showOrderSuccess() {
     let msg = document.createElement("div");
     msg.classList.add("order-message");
@@ -184,4 +195,96 @@ function showOrderSuccess() {
         msg.remove();
         loadCart();
     }, 2000);
+}
+
+
+// ================= ADMIN LOGIN =================
+function adminLogin() {
+    let user = document.getElementById("admin-user").value;
+    let pass = document.getElementById("admin-pass").value;
+
+    if (user === "admin" && pass === "1234") {
+        window.location.href = "admin.html";
+    } else {
+        alert("Wrong credentials");
+    }
+}
+
+
+// ================= LOAD ORDERS =================
+function loadOrders() {
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+    let container = document.getElementById("orders-container");
+
+    if (!orders.length) {
+        container.innerHTML = "<h2>No Orders Yet</h2>";
+        return;
+    }
+
+    orders.forEach(order => {
+        let div = document.createElement("div");
+        div.classList.add("order-box");
+
+        let itemsHTML = "";
+
+        order.items.forEach(item => {
+            itemsHTML += `<p>${item.name} × ${item.quantity}</p>`;
+        });
+
+        div.innerHTML = `
+            <h3>User: ${order.userName}</h3>
+            <p>${order.time}</p>
+            ${itemsHTML}
+            <h4>Total: ₹${order.total}</h4>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+// ================= ADMIN PRODUCTS =================
+function addProduct() {
+    let name = document.getElementById("pname").value;
+    let price = document.getElementById("pprice").value;
+    let image = document.getElementById("pimage").value;
+
+    if (!name || !price || !image) {
+        alert("Fill all fields");
+        return;
+    }
+
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+
+    products.push({
+        name: name,
+        price: Number(price),
+        image: image
+    });
+
+    localStorage.setItem("products", JSON.stringify(products));
+
+    alert("Product Added Successfully!");
+}
+
+
+function loadAdminProducts() {
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+    let container = document.querySelector(".products");
+
+    products.forEach(product => {
+        let div = document.createElement("div");
+        div.classList.add("product-box");
+
+        div.innerHTML = `
+            <img src="${product.image}">
+            <div class="product-info">
+                <h2>${product.name}</h2>
+                <p>₹${product.price}</p>
+                <button onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
 }
