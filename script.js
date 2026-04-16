@@ -1,17 +1,21 @@
-// ================= ADD TO CART =================
+// =====================
+// ADD TO CART
+// =====================
 function addToCart(name, price) {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+        alert("Please login first to add items to cart!");
+        window.location.href = "login.html";
+        return;
+    }
 
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
     let existingItem = cart.find(item => item.name === name);
 
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        cart.push({
-            name: name,
-            price: Number(price),
-            quantity: 1
-        });
+        cart.push({ name: name, price: Number(price), quantity: 1 });
     }
 
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -19,45 +23,57 @@ function addToCart(name, price) {
 }
 
 
-// ================= LOAD CART =================
+// =====================
+// LOAD CART
+// =====================
 function loadCart() {
     if (!checkLogin()) return;
 
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     let container = document.getElementById("cart-items");
-
     container.innerHTML = "";
 
+    // Show dispatch notifications for this user
+    let user = JSON.parse(localStorage.getItem("user"));
+    let notifications = JSON.parse(localStorage.getItem("userNotifications")) || [];
+    notifications.filter(n => n.email === user.email && !n.seen).forEach(notif => {
+        let banner = document.createElement("div");
+        banner.className = "dispatch-banner";
+        banner.innerHTML = `<div style="display:flex;align-items:flex-start;gap:15px;">
+            <span style="font-size:34px;">🚚</span>
+            <div style="flex:1;">
+                <strong style="font-size:16px;display:block;margin-bottom:4px;">Your order has been dispatched!</strong>
+                <p style="font-size:13px;margin-bottom:3px;">${notif.orderDetails}</p>
+                <small style="font-size:12px;opacity:0.8;">Total: ₹${notif.total} &nbsp;|&nbsp; ${notif.dispatchedAt}</small>
+            </div>
+            <button onclick="dismissNotif(${notif.id},this)" style="background:rgba(255,255,255,0.25);border:none;color:white;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;flex-shrink:0;">✕</button>
+        </div>`;
+        container.appendChild(banner);
+    });
+
     if (cart.length === 0) {
-        container.innerHTML = "<h2 class='empty-cart'>Your cart is empty</h2>";
+        container.innerHTML = "<h2 class='empty-cart'>Your cart is empty 🛒</h2>";
         return;
     }
 
     let total = 0;
 
     cart.forEach((item, index) => {
-
         if (!item.quantity) item.quantity = 1;
-
         let price = Number(item.price);
         let quantity = Number(item.quantity);
-
         total += price * quantity;
 
         let div = document.createElement("div");
         div.classList.add("cart-item");
-
         div.innerHTML = `
             <div class="cart-left">
                 <h3>${item.name}</h3>
-                <p>₹${price} × ${quantity}</p>
+                <p>₹${price} × ${quantity} = ₹${price * quantity}</p>
             </div>
-
             <div class="cart-right">
                 <button onclick="removeItem(${index})">Remove</button>
-            </div>
-        `;
-
+            </div>`;
         container.appendChild(div);
     });
 
@@ -66,20 +82,50 @@ function loadCart() {
     totalBox.innerHTML = `<h2>Total: ₹${total}</h2>`;
     container.appendChild(totalBox);
 
-    // PLACE ORDER BUTTON
     let orderBtn = document.createElement("button");
     orderBtn.innerText = "Place Order";
     orderBtn.classList.add("order-btn");
-
-    orderBtn.onclick = function() {
-        placeOrder();
+    orderBtn.onclick = function () {
+        placeOrder(cart, total);
     };
-
     container.appendChild(orderBtn);
 }
 
 
-// ================= REMOVE ITEM =================
+// =====================
+// PLACE ORDER & SAVE TO ADMIN
+// =====================
+function placeOrder(cart, total) {
+    let user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
+
+    let orders = JSON.parse(localStorage.getItem("allOrders")) || [];
+
+    let orderDetails = cart.map(item => `${item.name} x${item.quantity}`).join(", ");
+
+    let newOrder = {
+        id: Date.now(),
+        customer: user.name,
+        mobile: user.mobile,
+        email: user.email,
+        address: user.address,
+        orderDetails: orderDetails,
+        total: total,
+        date: new Date().toLocaleString(),
+        status: "Pending"
+    };
+
+    orders.push(newOrder);
+    localStorage.setItem("allOrders", JSON.stringify(orders));
+    localStorage.removeItem("cart");
+
+    showOrderSuccess();
+}
+
+
+// =====================
+// REMOVE ITEM
+// =====================
 function removeItem(index) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     cart.splice(index, 1);
@@ -88,50 +134,115 @@ function removeItem(index) {
 }
 
 
-// ================= LOGIN =================
-function loginUser() {
-    let name = document.getElementById("name").value;
-    let mobile = document.getElementById("mobile").value;
-    let email = document.getElementById("email").value;
-    let address = document.getElementById("address").value;
+// =====================
+// REGISTER USER
+// =====================
+function registerUser() {
+    let name = document.getElementById("reg-name").value.trim();
+    let mobile = document.getElementById("reg-mobile").value.trim();
+    let email = document.getElementById("reg-email").value.trim();
+    let address = document.getElementById("reg-address").value.trim();
+    let password = document.getElementById("reg-password").value.trim();
 
-    if (!name || !mobile || !email || !address) {
+    if (!name || !mobile || !email || !address || !password) {
+        alert("Please fill all fields");
+        return;
+    }
+    if (mobile.length !== 10 || isNaN(mobile)) {
+        alert("Mobile number must be exactly 10 digits");
+        return;
+    }
+    if (!email.includes("@")) {
+        alert("Enter a valid email address");
+        return;
+    }
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters");
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+    let exists = users.find(u => u.email === email);
+    if (exists) {
+        alert("This email is already registered. Please login.");
+        return;
+    }
+
+    let newUser = { name, mobile, email, address, password };
+    users.push(newUser);
+    localStorage.setItem("registeredUsers", JSON.stringify(users));
+
+    alert("Registration Successful! Please login now.");
+    showLoginForm();
+}
+
+
+// =====================
+// LOGIN USER
+// =====================
+function loginUser() {
+    let email = document.getElementById("login-email").value.trim();
+    let password = document.getElementById("login-password").value.trim();
+
+    if (!email || !password) {
         alert("Please fill all fields");
         return;
     }
 
-    if (mobile.length !== 10 || isNaN(mobile)) {
-        alert("Mobile number must be 10 digits");
+    let users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+    let user = users.find(u => u.email === email && u.password === password);
+
+    if (!user) {
+        alert("Invalid email or password. Please register first.");
         return;
     }
 
-    if (!email.includes("@")) {
-        alert("Email must contain @");
-        return;
-    }
-
-    let user = { name, mobile, email, address };
     localStorage.setItem("user", JSON.stringify(user));
-
-    alert("Login Successful!");
+    alert("Login Successful! Welcome, " + user.name + "!");
     window.location.href = "products.html";
 }
 
 
-// ================= CHECK LOGIN =================
+// =====================
+// LOGOUT USER
+// =====================
+function logoutUser() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("cart");
+    window.location.href = "login.html";
+}
+
+
+// =====================
+// SHOW LOGIN / REGISTER FORM TOGGLE
+// =====================
+function showLoginForm() {
+    document.getElementById("login-section").style.display = "block";
+    document.getElementById("register-section").style.display = "none";
+}
+
+function showRegisterForm() {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("register-section").style.display = "block";
+}
+
+
+// =====================
+// CHECK LOGIN
+// =====================
 function checkLogin() {
     let user = JSON.parse(localStorage.getItem("user"));
 
     if (!user) {
         let container = document.getElementById("cart-items");
-
         if (container) {
             container.innerHTML = `
                 <div style="text-align:center; margin-top:50px;">
                     <h2>Please login first</h2>
-                    <button onclick="goToLogin()">Go to Login</button>
-                </div>
-            `;
+                    <button onclick="goToLogin()" style="padding:10px 20px; margin-top:20px; cursor:pointer;">
+                        Go to Login
+                    </button>
+                </div>`;
         }
         return false;
     }
@@ -139,152 +250,156 @@ function checkLogin() {
 }
 
 
-// ================= NAVIGATION =================
-function goToLogin() {
-    window.location.href = "login.html";
-}
-
+// =====================
+// SHOW USER NAME IN NAVBAR
+// =====================
 function showUserName() {
     let user = JSON.parse(localStorage.getItem("user"));
     let nameBox = document.getElementById("user-name");
 
     if (user && nameBox) {
-        nameBox.innerHTML = "Hello, " + user.name;
+        nameBox.innerHTML = `Hello, ${user.name} &nbsp; <a href="#" onclick="logoutUser()" style="font-size:14px; color:red;">Logout</a>`;
     }
 }
 
 
-// ================= PLACE ORDER =================
-function placeOrder() {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let user = JSON.parse(localStorage.getItem("user"));
-    let orders = JSON.parse(localStorage.getItem("orders")) || [];
-
-    let total = 0;
-
-    cart.forEach(item => {
-        if (!item.quantity) item.quantity = 1;
-        total += item.price * item.quantity;
-    });
-
-    let orderData = {
-        userName: user.name,
-        items: cart,
-        total: total,
-        time: new Date().toLocaleString()
-    };
-
-    orders.push(orderData);
-    localStorage.setItem("orders", JSON.stringify(orders));
-
-    showOrderSuccess();
-
-    localStorage.removeItem("cart");
+// =====================
+// GO TO LOGIN
+// =====================
+function goToLogin() {
+    window.location.href = "login.html";
 }
 
 
-// ================= SUCCESS MESSAGE =================
+// =====================
+// ORDER SUCCESS POPUP
+// =====================
 function showOrderSuccess() {
     let msg = document.createElement("div");
     msg.classList.add("order-message");
-    msg.innerText = "Order Placed Successfully!";
-
+    msg.innerText = "🎉 Order Placed Successfully!";
     document.body.appendChild(msg);
 
     setTimeout(() => {
         msg.remove();
         loadCart();
-    }, 2000);
+    }, 2500);
 }
 
 
-// ================= ADMIN LOGIN =================
-function adminLogin() {
-    let user = document.getElementById("admin-user").value;
-    let pass = document.getElementById("admin-pass").value;
+// =====================
+// ADMIN LOGIN
+// =====================
+function loginAdmin() {
+    let id = document.getElementById("adminId").value.trim();
+    let pass = document.getElementById("adminPass").value.trim();
 
-    if (user === "admin" && pass === "1234") {
-        window.location.href = "admin.html";
+    if (id === "admin" && pass === "admin123") {
+        document.getElementById("admin-login-box").style.display = "none";
+        document.getElementById("admin-dashboard").style.display = "block";
+        loadAdminOrders();
     } else {
-        alert("Wrong credentials");
+        alert("Invalid Admin ID or Password!\nHint: ID = admin | Password = admin123");
     }
 }
 
 
-// ================= LOAD ORDERS =================
-function loadOrders() {
-    let orders = JSON.parse(localStorage.getItem("orders")) || [];
-    let container = document.getElementById("orders-container");
+// =====================
+// LOAD ADMIN ORDERS
+// =====================
+function loadAdminOrders() {
+    let orders = JSON.parse(localStorage.getItem("allOrders")) || [];
+    let tbody = document.getElementById("admin-orders-list");
+    let totalRevenue = document.getElementById("total-revenue");
+    tbody.innerHTML = "";
 
-    if (!orders.length) {
-        container.innerHTML = "<h2>No Orders Yet</h2>";
+    if (orders.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>No orders yet.</td></tr>";
+        if (totalRevenue) totalRevenue.innerText = "Total Revenue: ₹0";
         return;
     }
 
-    orders.forEach(order => {
-        let div = document.createElement("div");
-        div.classList.add("order-box");
-
-        let itemsHTML = "";
-
-        order.items.forEach(item => {
-            itemsHTML += `<p>${item.name} × ${item.quantity}</p>`;
-        });
-
-        div.innerHTML = `
-            <h3>User: ${order.userName}</h3>
-            <p>${order.time}</p>
-            ${itemsHTML}
-            <h4>Total: ₹${order.total}</h4>
-        `;
-
-        container.appendChild(div);
+    let revenue = 0;
+    orders.forEach((order, index) => {
+        revenue += order.total;
+        let isDispatched = order.status === "Dispatched";
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${order.customer}</td>
+            <td>${order.mobile}<br><small>${order.email}</small><br><small>${order.address}</small></td>
+            <td>${order.orderDetails}</td>
+            <td>₹${order.total}</td>
+            <td><small>${order.date}</small></td>
+            <td>${isDispatched
+                ? `<span class="dispatched-badge">✅ Dispatched</span>`
+                : `<button class="dispatch-btn" onclick="dispatchOrder(${order.id})">🚚 Dispatch</button>`
+            }</td>`;
+        tbody.appendChild(tr);
     });
+
+    if (totalRevenue) totalRevenue.innerText = "Total Revenue: ₹" + revenue;
 }
 
 
-// ================= ADMIN PRODUCTS =================
-function addProduct() {
-    let name = document.getElementById("pname").value;
-    let price = document.getElementById("pprice").value;
-    let image = document.getElementById("pimage").value;
+// =====================
+// DISPATCH ORDER
+// =====================
+function dispatchOrder(orderId) {
+    let orders = JSON.parse(localStorage.getItem("allOrders")) || [];
+    let order = orders.find(o => o.id === orderId);
+    if (!order || order.status === "Dispatched") return;
 
-    if (!name || !price || !image) {
-        alert("Fill all fields");
-        return;
+    if (!confirm(`Dispatch order for ${order.customer}?\nItems: ${order.orderDetails}\nTotal: ₹${order.total}`)) return;
+
+    order.status = "Dispatched";
+    order.dispatchedAt = new Date().toLocaleString();
+    localStorage.setItem("allOrders", JSON.stringify(orders));
+
+    let notifications = JSON.parse(localStorage.getItem("userNotifications")) || [];
+    notifications.push({
+        id: orderId,
+        email: order.email,
+        customer: order.customer,
+        orderDetails: order.orderDetails,
+        total: order.total,
+        dispatchedAt: order.dispatchedAt,
+        seen: false
+    });
+    localStorage.setItem("userNotifications", JSON.stringify(notifications));
+
+    let msg = document.createElement("div");
+    msg.classList.add("order-message");
+    msg.style.background = "#1a6fc4";
+    msg.innerHTML = `🚚 Dispatched!<br><small style="font-size:14px;">Notification sent to ${order.customer}</small>`;
+    document.body.appendChild(msg);
+    setTimeout(() => { msg.remove(); loadAdminOrders(); }, 2500);
+}
+
+
+// =====================
+// CLEAR ALL ORDERS (Admin)
+// =====================
+function clearAllOrders() {
+    if (confirm("Are you sure you want to clear ALL orders?")) {
+        localStorage.removeItem("allOrders");
+        loadAdminOrders();
     }
-
-    let products = JSON.parse(localStorage.getItem("products")) || [];
-
-    products.push({
-        name: name,
-        price: Number(price),
-        image: image
-    });
-
-    localStorage.setItem("products", JSON.stringify(products));
-
-    alert("Product Added Successfully!");
 }
 
 
-function loadAdminProducts() {
-    let products = JSON.parse(localStorage.getItem("products")) || [];
-    let container = document.querySelector(".products");
-
-    products.forEach(product => {
-        let div = document.createElement("div");
-        div.classList.add("product-box");
-
-        div.innerHTML = `
-            <img src="${product.image}">
-            <div class="product-info">
-                <h2>${product.name}</h2>
-                <p>₹${product.price}</p>
-                <button onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
-            </div>
-        `;
-
-        container.appendChild(div);
-    });
+// =====================
+// DISMISS DISPATCH NOTIFICATION
+// =====================
+function dismissNotif(id, btn) {
+    let notifications = JSON.parse(localStorage.getItem("userNotifications")) || [];
+    let n = notifications.find(n => n.id === id);
+    if (n) n.seen = true;
+    localStorage.setItem("userNotifications", JSON.stringify(notifications));
+    btn.closest(".dispatch-banner").remove();
+}
+function logoutAdmin() {
+    document.getElementById("admin-dashboard").style.display = "none";
+    document.getElementById("admin-login-box").style.display = "flex";
+    document.getElementById("adminId").value = "";
+    document.getElementById("adminPass").value = "";
 }
