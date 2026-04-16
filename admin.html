@@ -1,17 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Panel</title>
+    <meta charset="UTF-8">
+    <title>STYLE-MART Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Audiowide&family=Bruno+Ace&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="design.css">
 </head>
 
-<body onload="loadOrders()">
+<body onload="showUserName();">
+<main>
 
-<h1 style="text-align:center;">Admin Orders Panel</h1>
+    <nav>
+        <h2>STYLE-MART</h2>
+        <div class="part2">
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart</a>
+            <a href="login.html">Login</a>
+            <div id="user-name"></div>
+        </div>
+    </nav>
 
-<div id="orders-container"></div>
+    <!-- ADMIN LOGIN BOX -->
+    <div id="admin-login-box" class="login" style="margin-top: 80px;">
+        <div class="login-box">
+            <h2 style="text-align:center; margin-bottom:20px;">🔐 Admin Access</h2>
+            <label>Admin ID:</label>
+            <input type="text" id="adminId" placeholder="Enter Admin ID">
+            <label>Password:</label>
+            <input type="password" id="adminPass" placeholder="Enter Admin Password">
+            <button onclick="loginAdmin()">Enter Dashboard</button>
+            <p style="text-align:center; margin-top:12px; font-size:12px; color:#888;">
+                Default: ID = <b>admin</b> | Password = <b>admin123</b>
+            </p>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div id="admin-dashboard" style="display:none; padding: 30px 60px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:25px;">
+            <h1 style="font-family:'Audiowide',sans-serif;">📋 Customer Orders</h1>
+            <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                <span id="total-revenue" style="font-size:20px; font-weight:bold; background:black; color:#D5FF41; padding:10px 20px; border-radius:25px;">
+                    Total Revenue: ₹0
+                </span>
+                <button onclick="clearAllOrders()" class="order-btn" style="background:red;">🗑 Clear All Orders</button>
+                <button onclick="logoutAdmin()" class="order-btn" style="background:black;">Logout Admin</button>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table id="order-table" style="width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+                <thead>
+                    <tr style="background:black; color:white;">
+                        <th style="padding:15px;">Customer</th>
+                        <th style="padding:15px;">Contact & Address</th>
+                        <th style="padding:15px;">Order Details</th>
+                        <th style="padding:15px;">Total</th>
+                        <th style="padding:15px;">Date & Time</th>
+                        <th style="padding:15px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-orders-list">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- Admin table row styling -->
+<style>
+    #order-table tbody tr:nth-child(even) { background: #f9f9f9; }
+    #order-table tbody tr:hover { background: #efffcc; transition:0.2s; }
+    #order-table td { padding: 14px 15px; border-bottom: 1px solid #eee; vertical-align:top; }
+    .dispatch-btn { padding:9px 18px; background:#1a6fc4; color:white; border:none; border-radius:20px; font-size:13px; cursor:pointer; font-family:'Poppins',sans-serif; font-weight:600; transition:0.3s; white-space:nowrap; }
+    .dispatch-btn:hover { background:#0d4f96; transform:scale(1.05); }
+    .dispatched-badge { display:inline-block; padding:7px 14px; background:#e6f9ee; color:#1a9c4a; border:1.5px solid #1a9c4a; border-radius:20px; font-size:13px; font-weight:600; }
+</style>
 
 <script src="script.js"></script>
-
 </body>
 </html>
