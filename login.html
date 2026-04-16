@@ -2,21 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STYLE-MART Login</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Audiowide&family=Bruno+Ace&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="design.css">
 </head>
 
-<body onload="showUserName();">
-
+<body onload="showUserName()">
 <main>
 
-    <!-- NAVBAR -->
     <nav>
         <h2>STYLE-MART</h2>
         <div class="part2">
-            <a href="admin-login.html" class="admin-btn">Admin</a>
             <a href="products.html">Products</a>
             <a href="cart.html">Cart</a>
             <a href="login.html">Login</a>
@@ -24,34 +21,72 @@
         </div>
     </nav>
 
-    <!-- LOGIN FORM -->
     <section>
         <div class="login">
-            <div class="login-box">
+            <div class="login-box" style="width:340px;">
 
-                <h2 style="text-align:center; margin-bottom:20px;">Login</h2>
+                <!-- TABS -->
+                <div style="display:flex; margin-bottom:20px; border-bottom:2px solid #eee;">
+                    <button onclick="showLoginForm()" id="tab-login"
+                        style="flex:1; padding:10px; border:none; background:black; color:white; font-size:15px; cursor:pointer; border-radius:8px 0 0 0;">
+                        Login
+                    </button>
+                    <button onclick="showRegisterForm()" id="tab-register"
+                        style="flex:1; padding:10px; border:none; background:#ccc; color:black; font-size:15px; cursor:pointer; border-radius:0 8px 0 0;">
+                        Register
+                    </button>
+                </div>
 
-                <label>Your Name:</label>
-                <input type="text" id="name" placeholder="Enter your name">
+                <!-- LOGIN FORM -->
+                <div id="login-section">
+                    <h2 style="text-align:center; margin-bottom:15px;">Welcome Back!</h2>
 
-                <label>Mobile No:</label>
-                <input type="text" id="mobile" placeholder="Enter 10 digit number">
+                    <label>Email:</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
 
-                <label>Email:</label>
-                <input type="email" id="email" placeholder="Enter email">
+                    <label>Password:</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
 
-                <label>Address:</label>
-                <input type="text" id="address" placeholder="Enter address">
+                    <button onclick="loginUser()">Login</button>
 
-                <button onclick="loginUser()">Login</button>
+                    <p style="text-align:center; margin-top:15px; font-size:13px;">
+                        Don't have an account?
+                        <a href="#" onclick="showRegisterForm()" style="color:black; font-weight:bold;">Register here</a>
+                    </p>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <div id="register-section" style="display:none;">
+                    <h2 style="text-align:center; margin-bottom:15px;">Create Account</h2>
+
+                    <label>Full Name:</label>
+                    <input type="text" id="reg-name" placeholder="Enter your name">
+
+                    <label>Mobile No:</label>
+                    <input type="tel" id="reg-mobile" placeholder="10-digit mobile number" maxlength="10">
+
+                    <label>Email:</label>
+                    <input type="email" id="reg-email" placeholder="Enter your email">
+
+                    <label>Address:</label>
+                    <input type="text" id="reg-address" placeholder="Enter your address">
+
+                    <label>Password:</label>
+                    <input type="password" id="reg-password" placeholder="Min 6 characters">
+
+                    <button onclick="registerUser()">Register</button>
+
+                    <p style="text-align:center; margin-top:15px; font-size:13px;">
+                        Already have an account?
+                        <a href="#" onclick="showLoginForm()" style="color:black; font-weight:bold;">Login here</a>
+                    </p>
+                </div>
 
             </div>
         </div>
     </section>
 
 </main>
-
 <script src="script.js"></script>
-
 </body>
 </html>
